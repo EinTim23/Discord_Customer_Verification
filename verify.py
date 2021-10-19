@@ -1,4 +1,5 @@
 import discord
+import os
 import ctypes
 from discord.ext import commands
 from discord.utils import get        
@@ -18,9 +19,9 @@ async def status_task():
         await asyncio.sleep(10)
         await client.change_presence(status=discord.Status.dnd, activity=discord.Game("sellix.io/ETSB"))
         await asyncio.sleep(10)
-        await client.change_presence(status=discord.Status.dnd, activity=discord.Game("eintim.ga/dashboard"))
+        await client.change_presence(status=discord.Status.dnd, activity=discord.Game("eintim.one/dashboard"))
         await asyncio.sleep(10)
-        await client.change_presence(status=discord.Status.dnd, activity=discord.Game("for help visit: docs.eintim.ga"))
+        await client.change_presence(status=discord.Status.dnd, activity=discord.Game("for help visit: docs.eintim.one"))
         await asyncio.sleep(10)
 @client.event
 async def on_ready():
@@ -41,8 +42,16 @@ async def on_message(ctx):
             await ctx.channel.send(embed=embed)
             await asyncio.sleep(0.3)
             respass = await client.wait_for("message", check=lambda message: message.author == ctx.author)
-            r = requests.get(f"https://eintim.ga/dashboard/api/verify.php?user={resuser.content}&pass={respass.content}")
-            if r.content == b'uhjfefdyaiu':
+            r = requests.get(f"https://eintim.one/dashboard/api/botverify.php?user={resuser.content}&pass={respass.content}&dcid={respass.author.id}")
+            if r.content == b'banned':
+                embed = discord.Embed(title="Verification aborted!", description="You are banned from the selfbot.", color=0x800000)
+                embed.set_footer(text="EinTim verify bot" )
+                await ctx.channel.send(embed=embed)
+            if r.content == b'invaliddc':
+                embed = discord.Embed(title="Verification aborted!", description="Your account is already connected to another discord account.", color=0x800000)
+                embed.set_footer(text="EinTim verify bot" )
+                await ctx.channel.send(embed=embed)
+            if r.content == b'All Right':
                 guild = client.get_guild(774334632274952192)
                 user = guild.get_member(ctx.author.id)
                 role = get(client.get_guild(774334632274952192).roles, id=817370368586022942)
@@ -51,7 +60,7 @@ async def on_message(ctx):
                 embed.set_thumbnail(url="https://media.discordapp.net/attachments/757680548213686272/759077346346139698/check.gif")
                 embed.set_footer(text="EinTim verify bot" )
                 await ctx.channel.send(embed=embed)
-            else:
+            elif r.content == b'Wrong password':
                 embed = discord.Embed(title="Verification aborted!", description="Wrong username or password", color=0x800000)
                 embed.set_footer(text="EinTim verify bot" )
                 await ctx.channel.send(embed=embed)
